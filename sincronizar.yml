@@ -1,0 +1,39 @@
+- hosts: {{ nombre_instancia }}
+  roles:
+    - odoo
+  tasks:
+    - name: Sincronizar ficheros en /opt para replicar instancia.
+      synchronize:
+        dest: "{{ ruta_replicas }}/{{ nombre_instancia }}"
+        src: "{{ ruta_odoo }}"
+        mode: pull
+        rsync_opts:
+          - "--no-links"
+          - "-F"
+      # Si la instancia es ymant el become da problemas, comentar las
+      # siguientes 2 lineas
+      become: true
+      become_user: odoo
+
+    - name: Sincronizar fichero conf.
+      synchronize:
+        dest: "{{ ruta_replicas }}/{{ nombre_instancia }}/etc/"
+        src: "{{ fichero_conf }}"
+        mode: pull
+      # Aquí pasa lo mismo con ymant
+      become: true
+      become_user: odoo
+
+# Una vez copiado en local, modificar el conf (en desarrollo)
+# - hosts: localhost
+#   roles:
+#     - odoo
+#   tasks:
+#     - name: Modificar el archivo de conf copiado en local
+#       replace:
+#         dest: "{{ ruta_replicas }}/{{ nombre_instancia }}/etc/{{ fichero_conf }}"
+#         backup: yes
+#         # Este regex hay que pulirlo mucho para que solo cambie los /opt de
+#         # inicio de ruta, o que lleven espacio, coma o signo igual delante.
+#         regexp: '\/opt\/'
+#
