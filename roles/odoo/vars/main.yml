@@ -1,3 +1,13 @@
-ruta_replicas: "/home/ruben/bisneSmart/dev/instancias"
+# Ruta en la que se guardará una carpeta que contenga la instancia.
+# Dentro de esta carpeta habrá una carpeta por cada servidor al que se conecte.
+# La carpeta de cada servidor tendrá el nombre que a él se asigne en la
+# variable "nombre_instancia" en el inventario de ansible. 
+ruta_replicas: "/home/ruben/odoo/instancias"
+# En el servidor a replicar, ruta que queremos sincronizar.
+# Típicamente será opt, pero si el filestore está en la ubicación por defecto
+# o si los repositorios tienen historias muy pesadas será necesario crear un 
+# fichero exclude para rsync. 
 ruta_odoo: "/opt"
+# En el servidor a replicar, ruta donde está el fichero de configuración.
+# Lo más importante es el addons_path.
 fichero_conf: "/etc/odoo-server.conf"

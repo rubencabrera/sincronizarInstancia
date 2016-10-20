@@ -1,29 +1,48 @@
-- hosts: {{ nombre_instancia }}
+# Playbook de ansible para sincronizar una instancia de odoo desde un 
+# servidor remoto.
+#
+# Las variables por defecto están en ./roles/odoo/vars/main.yml y son las
+# siguientes:
+# ruta_replicas: "/home/ruben/odoo/instancias" # Esta seguramente quieras 
+#                                                                    cambiarla
+# ruta_odoo: "/opt/"
+# fichero_conf: "/etc/odoo-server.conf"
+
+# Servidor o grupo de servidores definido en el inventario a sincronizar.
+- hosts: "{{ hosts_var }}"
   roles:
+    # El rol de ansible a usar.
     - odoo
   tasks:
     - name: Sincronizar ficheros en /opt para replicar instancia.
       synchronize:
         dest: "{{ ruta_replicas }}/{{ nombre_instancia }}"
         src: "{{ ruta_odoo }}"
+        # No cambiar el modo o escribiremos en el servidor
         mode: pull
         rsync_opts:
           - "--no-links"
           - "-F"
-      # Si la instancia es ymant el become da problemas, comentar las
-      # siguientes 2 lineas
-      become: true
-      become_user: odoo
+      # Con algunas configuraciones de permisos de usuarios linux en el
+      # servidor de destino, puede que las siguientes directivas nos den un 
+      # error de acceso. Comentar y volver a probar.
+      # Lo mejor para evitarlo y para permitir otras tareas de mantenimiento
+      # es que el usuario con el que ansible se conecta por ssh  sea el 
+      # propietario de las carpetas a sincronizar.
+      #become: true
+      #become_user: "{{ ansible_user }}"
 
     - name: Sincronizar fichero conf.
       synchronize:
         dest: "{{ ruta_replicas }}/{{ nombre_instancia }}/etc/"
         src: "{{ fichero_conf }}"
         mode: pull
-      # Aquí pasa lo mismo con ymant
-      become: true
-      become_user: odoo
+      # Lo mismo que antes. Lo mejor es que ansible_user sea el propietario del 
+      # fichero .conf
+      #become: true
+      #become_user: "{{ ansible_user }}"
 
+                           
 # Una vez copiado en local, modificar el conf (en desarrollo)
 # - hosts: localhost
 #   roles:
